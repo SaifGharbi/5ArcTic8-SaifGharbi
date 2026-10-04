@@ -11,6 +11,10 @@ pipeline {
         disableConcurrentBuilds()
     }
 
+    environment {
+        DOCKER_IMAGE = 'saifgharbi/gharbisaif_5arctic8_gestionprojets-backend'
+    }
+
     stages {
         stage('GIT') {
             steps {
@@ -62,6 +66,7 @@ pipeline {
                 timeout(time: 10, unit: 'MINUTES') {
                     script {
                         def gate = waitForQualityGate()
+
                         if (gate.status != 'OK') {
                             error "Quality Gate failed: ${gate.status}"
                         }
@@ -75,10 +80,43 @@ pipeline {
                 dir('backend') {
                     sh 'mvn -B package -DskipTests'
                 }
+
                 archiveArtifacts artifacts: 'backend/target/*.jar',
                                  fingerprint: true
             }
         }
+
+        stage('Docker Build') {
+            steps {
+                sh '''
+                    docker build \
+                      -t "$DOCKER_IMAGE:$BUILD_NUMBER" \
+                      backend
+                '''
+            }
+        }
+
+        stage('Docker Push') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-credentials',
+                    usernameVariable: 'DOCKERHUB_USER',
+                    passwordVariable: 'DOCKERHUB_TOKEN'
+                )]) {
+                    sh '''
+                        set +x
+                        export DOCKER_CONFIG="$(mktemp -d)"
+                        trap 'rm -rf "$DOCKER_CONFIG"' EXIT
+
+                        printf '%s' "$DOCKERHUB_TOKEN" |
+                          docker login \
+                            --username "$DOCKERHUB_USER" \
+                            --password-stdin
+
+                        docker push "$DOCKER_IMAGE:$BUILD_NUMBER"
+                    '''
+                }
+            }
+        }
     }
 }
-
