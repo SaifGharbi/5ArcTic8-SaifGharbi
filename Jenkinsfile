@@ -31,16 +31,21 @@ pipeline {
             }
         }
 
-        stage('Tests') {
+                stage('Tests') {
             steps {
                 dir('backend') {
                     sh 'mvn -B test'
+                    sh 'test -s target/site/jacoco/jacoco.xml'
                 }
             }
             post {
                 always {
                     junit testResults: 'backend/target/surefire-reports/*.xml',
-                          allowEmptyResults: true
+                          allowEmptyResults: false
+                }
+                success {
+                    archiveArtifacts artifacts: 'backend/target/site/jacoco/**',
+                                     fingerprint: true
                 }
             }
         }
@@ -54,6 +59,7 @@ pipeline {
                                 mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
                                   -Dsonar.projectKey=Devops-project \
                                   -Dsonar.projectName=Devops-project
+				  -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
                             '''
                         }
                     }
