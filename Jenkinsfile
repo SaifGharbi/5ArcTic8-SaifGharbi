@@ -54,10 +54,16 @@ pipeline {
             steps {
                 dir('backend') {
                     withSonarQubeEnv('SonarQube') {
-                        withEnv(["SONAR_TOKEN=${env.SONAR_AUTH_TOKEN}"]) { sh 'mvn -B 
-                            org.sonarsource.scanner.maven:sonar-maven-plugin:5.8.0.7211:sonar 
-                            -Dsonar.projectKey=Devops-project -Dsonar.projectName=Devops-project 
-                            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml'
+                        withEnv(["SONAR_TOKEN=${env.SONAR_AUTH_TOKEN}"]) {
+			 sh(
+                                'mvn -B ' +
+                                'org.sonarsource.scanner.maven:' +
+                                'sonar-maven-plugin:5.8.0.7211:sonar ' +
+                                '-Dsonar.projectKey=Devops-project ' +
+                                '-Dsonar.projectName=Devops-project ' +
+                                '-Dsonar.coverage.jacoco.xmlReportPaths=' +
+                                'target/site/jacoco/jacoco.xml'
+                            )
                         }
                     }
                 }
