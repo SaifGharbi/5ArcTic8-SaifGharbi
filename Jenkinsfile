@@ -102,6 +102,12 @@ pipeline {
             }
         }
 
+        stage('Frontend Docker Build') {
+            steps {
+                sh 'docker build -t "$FRONTEND_IMAGE:$BUILD_NUMBER" frontend'
+            }
+        }
+
         stage('Docker Push') {
             steps {
                 withCredentials([usernamePassword(
