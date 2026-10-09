@@ -12,7 +12,8 @@ pipeline {
     }
 
     environment {
-        DOCKER_IMAGE = 'saifgharbi/gharbisaif_5arctic8_gestionprojets-backend'
+        BACKEND_IMAGE = 'saifgharbi/gharbisaif_5arctic8_gestionprojets-backend'
+        FRONTEND_IMAGE = 'saifgharbi/gharbisaif_5arctic8_gestionprojets-frontend'
     }
 
     stages {
@@ -95,13 +96,9 @@ pipeline {
             }
         }
 
-        stage('Docker Build') {
+        stage('Backend Docker Build') {
             steps {
-                sh '''
-                    docker build \
-                      -t "$DOCKER_IMAGE:$BUILD_NUMBER" \
-                      backend
-                '''
+                sh 'docker build -t "$BACKEND_IMAGE:$BUILD_NUMBER" backend'
             }
         }
 
