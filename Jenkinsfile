@@ -131,5 +131,50 @@ pipeline {
                 }
             }
         }
+	        stage('Terraform Deploy') {
+            steps {
+                timeout(time: 25, unit: 'MINUTES') {
+                    withCredentials([
+                        string(
+                            credentialsId: 'mysql-app-password',
+                            variable: 'TF_VAR_mysql_password'
+                        ),
+                        string(
+                            credentialsId: 'mysql-root-password',
+                            variable: 'TF_VAR_mysql_root_password'
+                        )
+                    ]) {
+                        dir('terraform') {
+                            sh '''
+                                set +x
+                                set -eu
+                                umask 077
+
+                                export KUBECONFIG=/var/lib/jenkins/.kube/config
+                                export TF_IN_AUTOMATION=true
+                                export TF_VAR_backend_image="$BACKEND_IMAGE:$BUILD_NUMBER"
+                                export TF_VAR_frontend_image="$FRONTEND_IMAGE:$BUILD_NUMBER"
+
+                                terraform init -input=false -reconfigure
+                                terraform fmt -check
+                                terraform validate
+                                terraform plan -input=false -out=deployment.tfplan
+                                terraform apply -input=false deployment.tfplan
+
+                                kubectl rollout status deployment/mysql -n devops --timeout=300s
+                                kubectl rollout status deployment/backend -n devops --timeout=300s
+                                kubectl rollout status deployment/frontend -n devops --timeout=300s
+                                kubectl get pods -n devops
+                            '''
+                        }
+                    }
+                }
+            }
+            post {
+                always {
+                    sh 'rm -f terraform/deployment.tfplan'
+                }
+            }
+        }
     }
 }
