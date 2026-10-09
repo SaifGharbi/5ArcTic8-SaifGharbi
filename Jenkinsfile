@@ -125,7 +125,8 @@ pipeline {
                             --username "$DOCKERHUB_USER" \
                             --password-stdin
 
-                        docker push "$DOCKER_IMAGE:$BUILD_NUMBER"
+                        docker push "$BACKEND_IMAGE:$BUILD_NUMBER"
+			docker push "$FRONTEND_IMAGE:$BUILD_NUMBER"
                     '''
                 }
             }
