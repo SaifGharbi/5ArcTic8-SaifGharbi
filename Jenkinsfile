@@ -134,7 +134,7 @@ pipeline {
 	        stage('Terraform Deploy') {
             steps {
                 timeout(time: 25, unit: 'MINUTES') {
-                    withCredentials([
+                                        withCredentials([
                         string(
                             credentialsId: 'mysql-app-password',
                             variable: 'TF_VAR_mysql_password'
@@ -142,6 +142,10 @@ pipeline {
                         string(
                             credentialsId: 'mysql-root-password',
                             variable: 'TF_VAR_mysql_root_password'
+                        ),
+                        string(
+                            credentialsId: 'grafana-admin-password',
+                            variable: 'TF_VAR_grafana_admin_password'
                         )
                     ]) {
                         dir('terraform') {
