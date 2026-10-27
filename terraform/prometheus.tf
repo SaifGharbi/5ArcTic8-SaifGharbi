@@ -35,8 +35,8 @@ resource "kubernetes_config_map_v1" "prometheus" {
               targets = ["192.168.33.10:9100"]
             }
           ]
-        }
-	        {
+        },
+        {
           job_name     = "jenkins"
           metrics_path = "/prometheus/"
           static_configs = [
