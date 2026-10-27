@@ -27,6 +27,14 @@ resource "kubernetes_config_map_v1" "prometheus" {
               targets = ["localhost:9090"]
             }
           ]
+        },
+        {
+          job_name = "node-exporter"
+          static_configs = [
+            {
+              targets = ["192.168.33.10:9100"]
+            }
+          ]
         }
       ]
     })
